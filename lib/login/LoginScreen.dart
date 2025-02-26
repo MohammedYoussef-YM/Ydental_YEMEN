@@ -40,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
     await prefs.init();
     if (_formKey.currentState!.validate()) {
       setState(() {
-        _isLoading = true; // Show loading indicator
+        _isLoading = true; // عرض مؤشر التحميل
       });
       final email = _emailController.text;
       final password = _passwordController.text;
@@ -53,7 +53,10 @@ class _LoginScreenState extends State<LoginScreen> {
             : null;
 
         if (endpoint == null) {
-          showMessage('نوع المستخدم غير معروف',context);
+          showMessage('نوع المستخدم غير معروف', context);
+          setState(() {
+            _isLoading = false;
+          });
           return;
         }
 
@@ -62,6 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
           'password': password,
         });
 
+        // إذا لم يُرمى استثناء وتم استلام response
         if (response['success'] == true) {
           if (widget.userType == 'patient') {
             await prefs.setString('patient', jsonEncode(response['patient']));
@@ -72,27 +76,41 @@ class _LoginScreenState extends State<LoginScreen> {
               MaterialPageRoute(builder: (_) => PatientBottomNavigation()),
             );
           } else if (widget.userType == 'student') {
-
             await prefs.setString('student', jsonEncode(response['student']));
-            Provider.of<StudentData>(context, listen: false).updateStudent(response['student']);
-
+            Provider.of<StudentData>(context, listen: false)
+                .updateStudent(response['student']);
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (_) => const StudentBottomNavigation()),
             );
           }
-          showMessage('تم تسجيل الدخول بنجاح',context);
+          showMessage('تم تسجيل الدخول بنجاح', context);
         } else {
-          showMessage('البريد الإلكتروني أو كلمة المرور غير صحيحة',context);
+          // إذا كان response يحتوي على رسالة خطأ
+          if (response['message'] ==
+              "Your account has been blocked. Please contact support.") {
+            showMessage("عذرًا، تم حظر حسابك، لا يمكنك الدخول إلى التطبيق.", context);
+          } else if (response['message'] == "Validation failed") {
+            showMessage('البريد الإلكتروني أو كلمة المرور غير صحيحة', context);
+          } else {
+            showMessage('فشل تسجيل الدخول', context);
+          }
         }
       } catch (e) {
-        showMessage('حدث خطأ أثناء تسجيل الدخول: $e',context);
+        // في حالة رمي استثناء من _apiService.post
+        String errorStr = e.toString();
+        if (errorStr.contains("Your account has been blocked")) {
+          showMessage("عذرًا، تم حظر حسابك، لا يمكنك الدخول إلى التطبيق.", context);
+        } else if (errorStr.contains("Validation failed")) {
+          showMessage('البريد الإلكتروني أو كلمة المرور غير صحيحة', context);
+        } else {
+          showMessage('حدث خطأ أثناء تسجيل الدخول: $e', context);
+        }
       } finally {
         setState(() {
-          _isLoading = false; // Hide loading indicator, even if there's an error
+          _isLoading = false; // إخفاء مؤشر التحميل
         });
       }
-
     }
   }
 

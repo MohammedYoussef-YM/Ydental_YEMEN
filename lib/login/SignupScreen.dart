@@ -202,13 +202,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
             _profileImage!.path,
           ));
         }
-
         var response = await request.send();
         var responseData = await response.stream.toBytes();
         var responseString = String.fromCharCodes(responseData);
 
         if (response.statusCode == 200 || response.statusCode == 201) {
-
           var data = jsonDecode(responseString);
           SharedPreferences prefs = await SharedPreferences.getInstance();
           prefs.setString('student', jsonEncode(data['student']));
@@ -265,6 +263,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       _obscureText = !_obscureText; // تغيير حالة إظهار كلمة المرور
     });
   }
+
   @override
   void dispose() {
     _usernameController.dispose();
@@ -558,8 +557,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       focusedBorder: OutlineInputBorder(),
                                     ),
                                     onChanged: (value) {
-                                      provider.updateCity(value);
                                       _onCitySelected(value); // Should be string ID
+                                      provider.updateCity(value);
                                     },
                                     items: provider.cities.isNotEmpty
                                         ? provider.cities.map((city) {
@@ -571,23 +570,46 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         : [],
                                   ),
                                   const SizedBox(height: 20),
-                                  DropdownButtonFormField<University>(
+                                  // DropdownButtonFormField<University>(
+                                  //   decoration: const InputDecoration(
+                                  //     labelText: 'الجامعة',
+                                  //     focusedBorder: OutlineInputBorder(),
+                                  //   ),
+                                  //   items: provider.universities.map<DropdownMenuItem<University>>((university) {
+                                  //     return DropdownMenuItem<University>(
+                                  //       value: university,
+                                  //       child: Text(university.name),
+                                  //     );
+                                  //   }).toList(),
+                                  //   onChanged: (university) {
+                                  //     provider.updateUniversity(university);
+                                  //     _onUniversitySelected(university?.id.toString());
+                                  //   },
+                                  //   validator: (value) => value == null ? 'ادخل جامعتك' : null,
+                                  // ),
+                                  DropdownButtonFormField<String>(
                                     decoration: const InputDecoration(
                                       labelText: 'الجامعة',
                                       focusedBorder: OutlineInputBorder(),
                                     ),
-                                    items: provider.universities.map<DropdownMenuItem<University>>((university) {
-                                      return DropdownMenuItem<University>(
-                                        value: university,
+                                    value: provider.selectedUniversity?.id, // استخدم ID بدلاً من الكائن
+                                    items: provider.universities.map<DropdownMenuItem<String>>((university) {
+                                      return DropdownMenuItem<String>(
+                                        value: university.id, // استخدم ID فقط
                                         child: Text(university.name),
                                       );
                                     }).toList(),
-                                    onChanged: (university) {
-                                      provider.updateUniversity(university);
-                                      _onUniversitySelected(university?.id.toString());
+                                    onChanged: (universityId) {
+                                      final selectedUni = provider.universities.firstWhere(
+                                            (uni) => uni.id == universityId,
+                                        orElse: () => University(id: '', name: '', cityId: ''),
+                                      );
+                                      provider.updateUniversity(selectedUni);
+                                      _onUniversitySelected(universityId);
                                     },
                                     validator: (value) => value == null ? 'ادخل جامعتك' : null,
                                   ),
+
                                 ],
                               );
                             },
@@ -650,6 +672,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         GestureDetector(
                           onTap: () => _pickImage(true),
                           child: TextFormField(
+                            // validator: (value) {
+                            //   print(value);
+                            //   if (value == null || value.isEmpty) {
+                            //     return 'الرجاء اختيار صورة';
+                            //   }
+                            //   return null;
+                            // },
                             enabled: false,
                             decoration: InputDecoration(
                               labelText: 'إرفاق صورة البطاقة الشخصية (إجباري)',
@@ -675,10 +704,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ),
                         const SizedBox(height: 16),
                         GestureDetector(
-
                           onTap: () => _pickImage(false),
                           child: TextFormField(
                             enabled: false,
+                            // validator: (value) {
+                            //   print("value : $value");
+                            //   if (value == null || value.isEmpty) {
+                            //     return 'الرجاء اختيار صورة';
+                            //   }
+                            //   return null;
+                            // },
                             decoration: InputDecoration(
                               labelText: 'إرفاق الصورة الشخصية (اختياري)',
                               // border: OutlineInputBorder(),

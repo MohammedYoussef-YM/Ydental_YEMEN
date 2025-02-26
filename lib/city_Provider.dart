@@ -38,6 +38,7 @@ class ProfileProvider with ChangeNotifier {
     selectedUniversity = null;
     universities.clear();
     if (cityId != null) {
+      print("cityId : $cityId");
       fetchUniversities(cityId);
     }
     notifyListeners();
@@ -45,9 +46,14 @@ class ProfileProvider with ChangeNotifier {
 
   /// **جلب الجامعات بناءً على `city_id`**
   Future<void> fetchUniversities(String cityId) async {
+    print("cityId 2 : $cityId");
+
     try {
+      print("cityId 3: $cityId");
+
       final response = await http.get(Uri.parse("$api_local/universities/select?city_id=$cityId"));
       if (response.statusCode == 200) {
+        print("cityId 4: $cityId");
         final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
         final List<dynamic> data = jsonResponse["data"];
 
@@ -55,6 +61,10 @@ class ProfileProvider with ChangeNotifier {
           id: universityJson["id"].toString(),
           name: universityJson["name"], cityId: universityJson["city_id"].toString(),
         )).toList();
+        print("universities id : ${universities[0]}");
+        print("universities id : ${universities[0].id}");
+        print("universities name : ${universities[0].name}");
+        print("universities city id: ${universities[0].cityId}");
 
         notifyListeners();
       } else {
@@ -70,4 +80,8 @@ class ProfileProvider with ChangeNotifier {
     selectedUniversity = university;
     notifyListeners();
   }
+  // void updateUniversity(University? university) {
+  //   selectedUniversity = university;
+  //   notifyListeners();
+  // }
 }

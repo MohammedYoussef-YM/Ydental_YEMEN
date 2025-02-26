@@ -7,7 +7,6 @@ import 'package:ydental_application/constant.dart';
 class AllReviewForStudentProvider with ChangeNotifier {
   List<Review> _reviews = [];
   bool _isLoading = false;
-  bool isAdd = false;
 
   List<Review> get reviews => _reviews;
   bool get isLoading => _isLoading;

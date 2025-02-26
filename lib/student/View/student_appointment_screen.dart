@@ -102,7 +102,7 @@ class _StudentAppointmentScreenState extends State<StudentAppointmentScreen>
               procedure: caseData["procedure"] as String? ?? 'N/A',
               gender: caseData["gender"] as String? ?? 'N/A',
               cost: (caseData["cost"] as num?)?.toDouble() ?? 0.0, // Cast to double
-              schedule: (caseData["schedules"] as List?)?.map((scheduleJson) => Schedule.fromJson(scheduleJson)).toList() ?? [Schedule(availableDate: DateTime.now(), availableTime: TimeOfDay.now())],
+              schedule: (caseData["schedules"] as List?)?.map((scheduleJson) => Schedule.fromJson(scheduleJson)).toList() ?? [Schedule(availableDate: DateTime.now(), availableTime: TimeOfDay.now(), id: 1)],
               minAge: (caseData["min_age"] as num?)?.toInt() ?? 0,
               maxAge: (caseData["max_age"] as num?)?.toInt() ?? 0,
               studentId: (caseData["student_id"] as num?)?.toInt() ?? 0,
@@ -263,13 +263,13 @@ class _StudentAppointmentScreenState extends State<StudentAppointmentScreen>
                 ),
               ),
               onPressed: () {
-                // Navigator.push(
-                //     context,
-                // //     MaterialPageRoute(
-                // //      // builder: (context) =>
-                // //        //   AddVisit(stud: appointment.studentData2),
-                // //    // )
-                // // );
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                     builder: (context) =>
+                         AddVisit(appointmentId: appointment.appointment_id, patientId: appointment.patient.id!, student: userData!.id!, patientName: appointment.patient.name!),
+                   )
+                );
               },
             ),
             TextButton(

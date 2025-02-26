@@ -10,6 +10,7 @@ import 'package:ydental_application/patint/View/complaint_screen.dart';
 import 'package:ydental_application/patint/View/patient_profile.dart';
 import 'package:ydental_application/patint/View/patient_setting_screen.dart';
 import 'package:ydental_application/patint/View/review_screen.dart';
+import 'package:ydental_application/patint/View/visit_screen.dart';
 import '../../colors.dart';
 import '../../student/View/complaint_screen.dart';
 
@@ -57,21 +58,6 @@ class _PatientDrawerState extends State<PatientDrawer> {
 
           ListTile(
             leading: const Icon(
-              Icons.person,
-              color: primary,
-            ),
-            title: const Text('البيانات الشخصية'),
-            onTap: () {
-              // الانتقال إلى شاشة PatientProfile
-              Navigator.push(context,
-                MaterialPageRoute(
-                  builder: (context) => const PatientProfile(isBack:true),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(
               Icons.home,
               color: AppColors.primaryColor,
             ),
@@ -82,20 +68,21 @@ class _PatientDrawerState extends State<PatientDrawer> {
               // ...
             },
           ),
-          // ... تكرار ListTile للعناصر الأخرى في الدرور
-          // ListTile(
-          //   leading: Icon(
-          //     Icons.chat,
-          //     color: AppColors.primaryColor,
-          //   ),
-          //   title: Text('االتقييمات'),
-          //   onTap: () {
-          //     Navigator.push(
-          //         context,
-          //         MaterialPageRoute(
-          //         builder: (context) => ReviewScreen(),));
-          //   },
-          // ),
+          ListTile(
+            leading: const Icon(
+              Icons.open_in_browser,
+              color: AppColors.secondaryColor,
+            ),
+            title: const Text('الزيارات'),
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => VisitPatientScreen(patient:userData!.id!),
+                  ));
+              // ...
+            },
+          ),
           ListTile(
             leading: const Icon(
               Icons.notifications,

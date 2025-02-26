@@ -40,7 +40,7 @@ class UserTypeSelection extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const LoginScreen(userType: 'patient')),
+                        MaterialPageRoute(builder: (context) =>  LoginScreen(userType: 'patient')),
                       );
                     },
                     child: const Column(
@@ -62,7 +62,7 @@ class UserTypeSelection extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const LoginScreen(userType: 'student')),
+                        MaterialPageRoute(builder: (context) =>  LoginScreen(userType: 'student')),
                       );
                     },
                     child: const Column(

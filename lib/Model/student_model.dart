@@ -22,6 +22,8 @@ class StudentData with ChangeNotifier {
   String? isBlocked;
   String? cityId;
   String? universityId;
+  String? cityName;
+  String? universityName;
   String? studentImage;
   String? userType;
   final ProfileProvider profileProvider = ProfileProvider();
@@ -43,6 +45,8 @@ class StudentData with ChangeNotifier {
     this.isBlocked,
     this.cityId,
     this.universityId,
+    this.cityName,
+    this.universityName,
     this.studentImage,
     this.userType,
     this.schedule,
@@ -66,6 +70,9 @@ class StudentData with ChangeNotifier {
     userType = data['userType'];
     cityId = data['city_id'].toString();
     universityId = data['university_id'].toString();
+    // Extract the city and university names from nested objects if they exist
+    cityName = data['city'] != null ? data['city']['name'] : null;
+    universityName = data['university'] != null ? data['university']['name'] : null;
     schedule = data['schedule'] != null ? Schedule.fromJson(data['schedule']) : null;
     myCaseModel = data['my_case_model'] != null ? MyCasesModel.fromJson(data['my_case_model']) : null;
 
@@ -87,6 +94,8 @@ class StudentData with ChangeNotifier {
       userType: json['userType'],
       cityId: json['city_id'].toString(),
       universityId: json['university_id'].toString(),
+      cityName: json['city'] != null ? json['city']['name'] : null,
+      universityName: json['university'] != null ? json['university']['name'] : null,
       myCaseModel: json['my_case_model'] != null ? MyCasesModel.fromJson(json['my_case_model']) : null,
     );
   }

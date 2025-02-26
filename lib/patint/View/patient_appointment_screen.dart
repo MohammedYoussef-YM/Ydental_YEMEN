@@ -98,7 +98,7 @@ class _PatientAppointmentScreenState extends State<PatientAppointmentScreen>
                   schedule: [ // Wrap in a list
                     Schedule(
                       availableDate: DateTime.now(),
-                      availableTime: TimeOfDay.now(),
+                      availableTime: TimeOfDay.now(), id: 1,
                     ),
                   ],
                   minAge: 0,

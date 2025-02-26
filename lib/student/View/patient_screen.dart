@@ -34,6 +34,7 @@ class _PatientScreenState extends State<PatientScreen> {
     _scrollController.addListener(_loadMore);
 
   }
+
   Future<void> _loadMore() async {
     if (isLoading || !_hasMore) return;
 

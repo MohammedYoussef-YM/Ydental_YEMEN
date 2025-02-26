@@ -38,7 +38,6 @@ class _AllReviewForStudentScreenState extends State<AllReviewForStudentScreen> {
         : 0.0;
 
     return Directionality(
-
       textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(

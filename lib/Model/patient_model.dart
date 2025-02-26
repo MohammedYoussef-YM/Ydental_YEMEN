@@ -67,68 +67,7 @@ class Patient with ChangeNotifier {
     );
   }
 }
-// class Patient with ChangeNotifier {
-//   int id;
-//   String name;
-//   String confirmPassword;
-//   String password;
-//   int phone_number;
-//   String email;
-//   String gender;
-//   DateTime date_of_birth;
-//   int? id_Card;
-//   String userType;
-//   String address;
-//  // String profilePicture;
-//   String? isBlocked;
-//
-//   Patient( {required this.id,required this.name,
-//     required this.password,required this.confirmPassword, required this.phone_number,
-//     required this.email, required this.gender, this.id_Card,required this.userType
-//   ,required this.address,required this.date_of_birth,this.isBlocked });
-//
-// }
 
-List<Patient> allPatient = [
-  Patient(
-    name: 'ghadeer matuq zaher',
-    id: 1,
-    email: 'g.mm@gmail.com',
-    gender: 'أنثى',
-    password: 'gh222222',
-    phoneNumber: "77869459",
-    idCard: "01002928228",
-    dateOfBirth: DateTime(1990, 5, 15),
-    confirmPassword: '456',
-    userType: 'patient', address: '',
-  ),
-
-  Patient(
-      name: 'فيصل عبدالرحمن الشريف ',
-      email: 'a.mm@gmail.com',
-      gender: 'ذكر',
-      password: 'gh222222',
-      phoneNumber: "77869459",
-      id: 3,
-      idCard: "01002928228",
-      confirmPassword: '', userType: 'patient',
-      address: '',
-      dateOfBirth: DateTime(1990, 5, 15)
-
-  ),
-  Patient(
-      name: 'سارة محمد علي',
-      email: 's.mm@gmail.com',
-      gender: 'أنثى',
-      password: 'gh222222',
-      phoneNumber: "77869459",
-      id: 4,
-      idCard: "01002928228",
-      confirmPassword: '', userType: 'patient',
-      address: '',
-      dateOfBirth: DateTime(1990, 5, 15)
-
-  ),
-];
+List<Patient> allPatient = [];
 
 

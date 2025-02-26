@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ydental_application/Model/patient_model.dart';
 import 'package:ydental_application/Model/student_model.dart';
 import 'package:ydental_application/colors.dart';
+import 'package:ydental_application/student/View/review_screen.dart';
 import 'student_home_screen.dart';
 import 'student_profile.dart';
 
@@ -43,6 +44,7 @@ class _StudentBottomNavigationState extends State<StudentBottomNavigation> {
         isLoading = false;
 
         pages.add(Home(student:userData!));
+        pages.add(AllReviewForStudentScreen(studentId: userData!.id!));
         pages.add(StudentProfile(student: userData!, isBack: false));
       });
     } else {
@@ -71,6 +73,10 @@ class _StudentBottomNavigationState extends State<StudentBottomNavigation> {
           BottomNavigationBarItem(
             icon: Icon(Iconsax.home, size: 35),
             label: "الرئيسية",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Iconsax.star, size: 35,color: Colors.amber,),
+            label: "التقييمات",
           ),
           BottomNavigationBarItem(
             icon: Icon(Iconsax.user, size: 35),

@@ -26,7 +26,7 @@ class Review {
       patientId: json['patient_id'],
       rating: json['rating'],
       comment: json['comment'],
-      patientName: json['patient']['name'],
+      patientName: json['patient'] != null ? json['patient']['name'] : '',
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
       studentId: json['student_id'],

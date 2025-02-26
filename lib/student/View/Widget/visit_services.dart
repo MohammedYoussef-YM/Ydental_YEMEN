@@ -28,6 +28,17 @@ class VisitService {
     }
   }
 
+  Future<List<Visit>> getPatientsVisits(int patientId) async {
+    final response = await http.get(Uri.parse('$api_local/visits/?patient_id=$patientId'));
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body)['data'] as List;
+      return data.map((json) => Visit.fromJson(json)).toList();
+    } else {
+      throw Exception('فشل في تحميل الزيارات');
+    }
+  }
+
   Future<Visit> updateVisitStatus(Visit visit, VisitStatus newStatus) async {
     final response = await http.put(
       Uri.parse('$api_local/visits/${visit.id}/'),

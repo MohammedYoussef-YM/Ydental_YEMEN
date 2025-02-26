@@ -25,6 +25,8 @@ class _CaseDetaileState extends State<CaseDetaile> {
   StudentData? studentDetails;
   Patient? patient;
   bool isLoading = true;
+  int? _loadingScheduleId;
+
 
   @override
   void initState() {
@@ -67,7 +69,7 @@ class _CaseDetaileState extends State<CaseDetaile> {
     }
   }
 
-  void _showConfirmationDialog(String date, String time) {
+  void _showConfirmationDialog(String date, String time, int scheduleId) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -98,7 +100,7 @@ class _CaseDetaileState extends State<CaseDetaile> {
               ),
               onPressed: () async {
                 Navigator.of(context).pop();
-                await _bookAppointment();
+                await _bookAppointment(scheduleId);
               },
             ),
           ],
@@ -107,7 +109,10 @@ class _CaseDetaileState extends State<CaseDetaile> {
     );
   }
 
-  Future<void> _bookAppointment() async {
+  Future<void> _bookAppointment(int scheduleId) async {
+    setState(() {
+      _loadingScheduleId = scheduleId; // Only this button will show loading
+    });
     final apiUrl = '$api_local/appointments/';
     final response = await http.post(
       Uri.parse(apiUrl),
@@ -118,11 +123,15 @@ class _CaseDetaileState extends State<CaseDetaile> {
         "patient_id": patient?.id,
         "student_id": widget.student.studentId,
         "thecase_id": widget.student.id, // تأكد من أن لديك الـ caseId
+        "schedule_id": scheduleId,
       }),
     );
 
-    if (response.statusCode == 201) {
+    setState(() {
+      _loadingScheduleId = null; // Reset after booking is done
+    });
 
+    if (response.statusCode == 201) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('تم الحجز بنجاح!'),
@@ -288,9 +297,9 @@ class _CaseDetaileState extends State<CaseDetaile> {
                     // final firstDate = widget.student.schedule.availableDate;
                     // final firstTime = widget.student.schedule.availableTime;
                         final schedule = widget.student.schedule[index]; // Get the schedule at the current index
+                        final scheduleId = schedule.id;
                         final formattedDate = DateFormat('EEEE, MMMM d, y').format(schedule.availableDate);
                         final formattedTime = '${schedule.availableTime.hour}:${schedule.availableTime.minute.toString().padLeft(2, '0')} ${schedule.availableTime.hour >= 12 ? 'PM' : 'AM'}';
-
                     // final formattedDate = DateFormat('EEEE, MMMM d, y').format(firstDate);
                     // final formattedTime = '${firstTime.hour}:${firstTime.minute} ${firstTime.hour >= 12 ? 'PM' : 'AM'}';
 
@@ -353,7 +362,7 @@ class _CaseDetaileState extends State<CaseDetaile> {
                               // زر الحجز
                               ElevatedButton(
                                 onPressed: () {
-                                  _showConfirmationDialog(formattedDate, formattedTime);
+                                  _showConfirmationDialog(formattedDate, formattedTime,scheduleId);
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.white,
@@ -362,7 +371,15 @@ class _CaseDetaileState extends State<CaseDetaile> {
                                   ),
                                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                                 ),
-                                child: const Text(
+                                child: _loadingScheduleId == scheduleId
+                                    ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.primaryColor,
+                                  ),
+                                ) : const Text(
                                   'حجز',
                                   style: TextStyle(
                                     color: AppColors.primaryColor,

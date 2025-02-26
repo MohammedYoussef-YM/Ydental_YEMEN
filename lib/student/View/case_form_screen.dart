@@ -34,9 +34,9 @@ class _CaseFormState extends State<CaseForm> {
   final List<TextEditingController> timeControllers = List.generate(3, (_) => TextEditingController());
 
    List<Schedule> schedules = [
-    Schedule(availableDate: DateTime.now(), availableTime: TimeOfDay.now()),
-    Schedule(availableDate: DateTime.now(), availableTime: TimeOfDay.now()),
-    Schedule(availableDate: DateTime.now(), availableTime: TimeOfDay.now())
+    Schedule(availableDate: DateTime.now(), availableTime: TimeOfDay.now(), id: 1),
+    Schedule(availableDate: DateTime.now(), availableTime: TimeOfDay.now(), id: 1),
+    Schedule(availableDate: DateTime.now(), availableTime: TimeOfDay.now(), id: 1)
   ]; // List of 3 schedules
 
   String dateErrorMessage = '';
@@ -484,7 +484,7 @@ class _CaseFormState extends State<CaseForm> {
                           });
                         },
                       ),
-                      const Text('انثى'),
+                      const Text('أنثى'),
                       Radio<String>(
                         value: 'Any',
                         groupValue: _gender,
@@ -495,7 +495,7 @@ class _CaseFormState extends State<CaseForm> {
                           });
                         },
                       ),
-                      const Text('ذكر _انثى'),
+                      const Text('ذكر _أنثى'),
                     ],
                   ),
                   if (_genderError != null)
