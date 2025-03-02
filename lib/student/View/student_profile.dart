@@ -114,7 +114,7 @@ class _StudentProfileState extends State<StudentProfile> {
                                       buildFieldRow(Icons.phone, 'رقم الهاتف: ${widget.student.phoneNumber}'),
                                       buildFieldRow(Icons.email_outlined, 'الإيميل: ${widget.student.email}'),
                                       buildFieldRow(Icons.person, 'الجنس: ${widget.student.gender}'),
-                                      buildFieldRow(Icons.location_city, 'المدينة: ${widget.student.cityName!}'),
+                                      buildFieldRow(Icons.location_city, 'المدينة: ${widget.student.cityName}'),
                                       buildFieldRow(Icons.business, 'الجامعة: ${widget.student.universityName}'),
                                       const SizedBox(height: 10),
                                       buildFieldRow(Icons.school, 'المستوى: ${widget.student.level}'),

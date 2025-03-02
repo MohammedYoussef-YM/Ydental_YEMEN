@@ -298,6 +298,7 @@ class _CaseDetaileState extends State<CaseDetaile> {
                     // final firstTime = widget.student.schedule.availableTime;
                         final schedule = widget.student.schedule[index]; // Get the schedule at the current index
                         final scheduleId = schedule.id;
+                        final isBooking = schedule.isBooking;
                         final formattedDate = DateFormat('EEEE, MMMM d, y').format(schedule.availableDate);
                         final formattedTime = '${schedule.availableTime.hour}:${schedule.availableTime.minute.toString().padLeft(2, '0')} ${schedule.availableTime.hour >= 12 ? 'PM' : 'AM'}';
                     // final formattedDate = DateFormat('EEEE, MMMM d, y').format(firstDate);
@@ -361,11 +362,13 @@ class _CaseDetaileState extends State<CaseDetaile> {
 
                               // زر الحجز
                               ElevatedButton(
-                                onPressed: () {
-                                  _showConfirmationDialog(formattedDate, formattedTime,scheduleId);
+                                onPressed: isBooking
+                                    ? null
+                                    : () {
+                                  _showConfirmationDialog(formattedDate, formattedTime, scheduleId);
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white,
+                                  backgroundColor:  Colors.white,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10.0),
                                   ),
@@ -379,7 +382,14 @@ class _CaseDetaileState extends State<CaseDetaile> {
                                     strokeWidth: 2,
                                     color: AppColors.primaryColor,
                                   ),
-                                ) : const Text(
+                                ) : isBooking ? const Text(
+                                  'تم الحجز',
+                                  style: TextStyle(
+                                    color: AppColors.backgroundColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ) :const Text(
                                   'حجز',
                                   style: TextStyle(
                                     color: AppColors.primaryColor,

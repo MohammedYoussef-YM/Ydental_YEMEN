@@ -34,9 +34,9 @@ class _CaseFormState extends State<CaseForm> {
   final List<TextEditingController> timeControllers = List.generate(3, (_) => TextEditingController());
 
    List<Schedule> schedules = [
-    Schedule(availableDate: DateTime.now(), availableTime: TimeOfDay.now(), id: 1),
-    Schedule(availableDate: DateTime.now(), availableTime: TimeOfDay.now(), id: 1),
-    Schedule(availableDate: DateTime.now(), availableTime: TimeOfDay.now(), id: 1)
+    Schedule(availableDate: DateTime.now(), availableTime: TimeOfDay.now(), id: 1,isBooking:false),
+    // Schedule(availableDate: DateTime.now(), availableTime: TimeOfDay.now(), id: 1),
+    // Schedule(availableDate: DateTime.now(), availableTime: TimeOfDay.now(), id: 1)
   ]; // List of 3 schedules
 
   String dateErrorMessage = '';
