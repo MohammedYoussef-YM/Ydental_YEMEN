@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:ydental_application/Model/appointment_model.dart';
 import 'package:ydental_application/Model/cases_model.dart';
 import 'package:ydental_application/Model/patient_model.dart';
+import 'package:ydental_application/Model/schedule_model.dart';
 import 'package:ydental_application/Model/student_model.dart';
 import 'package:ydental_application/constant.dart';
 
@@ -39,6 +40,7 @@ class AppointmentProvider extends ChangeNotifier {
             studentData: allStudentData.firstWhere(
                     (s) => s.id == appointmentJson["student_id"],
                 ), case_id: appointmentJson["thecase_id"],
+              schedule: appointmentJson["schedule"]??Schedule(id: 1, isBooking: false, availableDate: DateTime.now(), availableTime: TimeOfDay.now())
           );
         }).toList();
 

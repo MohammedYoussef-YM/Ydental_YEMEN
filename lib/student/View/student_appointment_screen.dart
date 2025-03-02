@@ -63,6 +63,14 @@ class _StudentAppointmentScreenState extends State<StudentAppointmentScreen>
     }
   }
 
+  static TimeOfDay _parseTime(String time) {
+    final parts = time.split(':');
+    return TimeOfDay(
+      hour: int.parse(parts[0]),
+      minute: int.parse(parts[1]),
+    );
+  }
+
   Future<void> fetchAppointments() async {
     if (userData == null) {
       return;
@@ -86,6 +94,8 @@ class _StudentAppointmentScreenState extends State<StudentAppointmentScreen>
           final student = appointmentJson["student"] as Map<String, dynamic>? ?? {};
           final patientData = appointmentJson["patient"] as Map<String, dynamic>? ?? {};
           final caseData = appointmentJson["thecase"] as Map<String, dynamic>? ?? {};
+          final schedule = appointmentJson["schedule"] as Map<String, dynamic>? ?? {};
+          print("Schedule data: ${appointmentJson["schedule"]}");
 
           return Appointment(
             appointment_id: (appointmentJson["id"] as num?)?.toInt() ?? 0,
@@ -102,7 +112,7 @@ class _StudentAppointmentScreenState extends State<StudentAppointmentScreen>
               procedure: caseData["procedure"] as String? ?? 'N/A',
               gender: caseData["gender"] as String? ?? 'N/A',
               cost: (caseData["cost"] as num?)?.toDouble() ?? 0.0, // Cast to double
-              schedule: (caseData["schedules"] as List?)?.map((scheduleJson) => Schedule.fromJson(scheduleJson)).toList() ?? [Schedule(availableDate: DateTime.now(), availableTime: TimeOfDay.now(), id: 1,isBooking:false)],
+              schedule:[],
               minAge: (caseData["min_age"] as num?)?.toInt() ?? 0,
               maxAge: (caseData["max_age"] as num?)?.toInt() ?? 0,
               studentId: (caseData["student_id"] as num?)?.toInt() ?? 0,
@@ -117,6 +127,8 @@ class _StudentAppointmentScreenState extends State<StudentAppointmentScreen>
               name: student["name"] as String? ?? 'Unknown Student',
             ),
             case_id: appointmentJson["thecase_id"],
+            schedule: Schedule(id: schedule["id"], availableDate: DateTime.parse(schedule["available_date"] as String? ?? '2025-01-01') ,
+                      availableTime: _parseTime(schedule["available_time"] as String? ?? '00:00'),isBooking: false), // استخراج من المستوى العلوي
           );
         }).toList(); // Convert to List<Appointment>
 
@@ -157,7 +169,9 @@ class _StudentAppointmentScreenState extends State<StudentAppointmentScreen>
 // دالة مساعدة لتحديث الحالة للحجز على الخادم
   Future<bool> _updateAppointmentStatus(Appointment appointment, String newStatus) async {
     try {
-      setState(() => isLoading = true);
+      if (mounted) {
+        setState(() => isLoading = true);
+      }
       final response = await http.put(
         Uri.parse('$api_local/appointments/${appointment.appointment_id}/'),
         headers: {'Content-Type': 'application/json'},
@@ -167,12 +181,16 @@ class _StudentAppointmentScreenState extends State<StudentAppointmentScreen>
           'patient_id': appointment.patient.id,
           'student_id': appointment.studentData?.id,
           'thecase_id': appointment.case_id,
+           "schedule_id":appointment.schedule.id
         }),
       );
       if (response.statusCode == 200) {
         final updatedData = jsonDecode(response.body);
         appointment.status = getStatusFromString(updatedData['status']);
         setState(() => isLoading = false);
+        ScaffoldMessenger.of(this.context).showSnackBar(
+          const SnackBar(content: Text('تم تحديث الحالة'),backgroundColor:Colors.green),
+        );
         return true;
       }
       isLoading = false;
@@ -229,9 +247,11 @@ class _StudentAppointmentScreenState extends State<StudentAppointmentScreen>
       if (success) {
         setState(() => appointment.status = AppointmentStatus.confirmed);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(this.context).showSnackBar(
           const SnackBar(content: Text('فشل في تحديث الحالة')),
         );
+        setState(() => isLoading = false);
+
       }
     }
   }
@@ -582,63 +602,58 @@ class _StudentAppointmentScreenState extends State<StudentAppointmentScreen>
                 const SizedBox(height: 6),
                 Divider(color: Colors.grey[350]),
                 const SizedBox(height: 6),
-                Column( // Use a Column to hold all the rows and dividers
-                children: appointment.case1.schedule.map((schedule) {
-                  return Column(
-                    children: [
-                      Row(
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(size: 16, Icons.calendar_month, color: Colors.grey),
-                              const SizedBox(width: 5),
-                              Text(
-                                DateFormat("d/MM/y").format(schedule.availableDate),
-                                style: const TextStyle(letterSpacing: 0),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(width: 25),
-                          Row(
-                            children: [
-                              const Icon(size: 16, Icons.access_time_filled, color: Colors.grey),
-                              const SizedBox(width: 5),
-                              Text(
-                                DateFormat('jm').format(
-                                  DateTime(
-                                    DateTime.now().year,
-                                    DateTime.now().month,
-                                    DateTime.now().day,
-                                    schedule.availableTime.hour,
-                                    schedule.availableTime.minute,
-                                  ),
+
+                Column(
+                  children: [
+                    Row(
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(size: 16, Icons.calendar_month, color: Colors.grey),
+                            const SizedBox(width: 5),
+                            Text(
+                              DateFormat("d/MM/y").format(appointment.schedule.availableDate),
+                              style: const TextStyle(letterSpacing: 0),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(width: 25),
+                        Row(
+                          children: [
+                            const Icon(size: 16, Icons.access_time_filled, color: Colors.grey),
+                            const SizedBox(width: 5),
+                            Text(
+                              DateFormat('jm').format(
+                                DateTime(
+                                  DateTime.now().year,
+                                  DateTime.now().month,
+                                  DateTime.now().day,
+                                  appointment.schedule.availableTime.hour,
+                                  appointment.schedule.availableTime.minute,
                                 ),
-                                style: const TextStyle(letterSpacing: 0),
                               ),
-                            ],
-                          ),
-                          const SizedBox(width: 25),
-                          Row(
-                            children: [
-                              CircleAvatar(
-                                backgroundColor: _getStatusColor(appointment.status),
-                                radius: 5,
-                              ),
-                              const SizedBox(width: 5),
-                              Text(
-                                _getStatusName(appointment.status),
-                                style: const TextStyle(letterSpacing: 0),
-                              )
-                            ],
-                          ),
-                        ],
-                      ),
-                      if (appointment.case1.schedule.indexOf(schedule) < appointment.case1.schedule.length - 1) // Divider after each item EXCEPT the last
-                        Divider(color: Colors.grey[350]),
-                    ],
-                  );
-                }).toList(),
-              ),
+                              style: const TextStyle(letterSpacing: 0),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(width: 25),
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              backgroundColor: _getStatusColor(appointment.status),
+                              radius: 5,
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              _getStatusName(appointment.status),
+                              style: const TextStyle(letterSpacing: 0),
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 6),
                 Divider(color: Colors.grey[350]),
                 const SizedBox(height: 15),
@@ -651,7 +666,7 @@ class _StudentAppointmentScreenState extends State<StudentAppointmentScreen>
                           backgroundColor: AppColors.primaryColor,
                           foregroundColor: Colors.white,
                         ),
-                        onPressed: () => confirmAppointment(context, appointment),
+                        onPressed: () => confirmAppointment(this.context, appointment), // استخدم this.context هنا
                         child: const Text('تأكيد الحجز'),
                       ),
                     const SizedBox(width: 10),

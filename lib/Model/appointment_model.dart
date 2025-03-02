@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'package:ydental_application/Model/schedule_model.dart';
 import 'patient_model.dart';
 import 'cases_model.dart';
 import 'student_model.dart';
@@ -15,6 +16,8 @@ class Appointment {
   final MyCasesModel case1;
   final int case_id;
   final StudentData? studentData;
+  final Schedule schedule;
+
 
   Appointment({
     required this.case1,
@@ -25,6 +28,7 @@ class Appointment {
     required this.appointment_id,
     required this.appointment_date,
     required this.appointment_time,
+    required this.schedule,
   });
   // Factory constructor to create an Appointment object from a JSON map
   factory Appointment.fromJson(Map<String, dynamic> json) {
@@ -40,7 +44,7 @@ class Appointment {
       // case1: json['appointment'] != null && json['appointment']['case'] != null ? MyCasesModel.fromJson(json['appointment']['case']) : null, // Assuming MyCasesModel has fromJson
       case_id: json['appointment'] != null ? json['appointment']['case_id'] : 0, // Assuming a case_id field exists
       studentData: json['appointment'] != null && json['appointment']['student'] != null ? StudentData.fromJson(json['appointment']['student']) : null, // Assuming Patient also has fromJson
-
+      schedule: Schedule.fromJson(json['appointment']['schedule'])
     );
   }
 }

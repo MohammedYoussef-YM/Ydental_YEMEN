@@ -9,6 +9,8 @@ import 'package:ydental_application/Model/cases_model.dart';
 import 'package:ydental_application/Model/patient_model.dart';
 import 'package:ydental_application/Model/student_model.dart';
 import 'package:ydental_application/constant.dart';
+import 'package:ydental_application/patint/View/bottom_navigation_screen.dart';
+import 'package:ydental_application/patint/View/patient_home_screen.dart';
 import 'package:ydental_application/patint/View/review_screen.dart';
 import 'package:ydental_application/patint/View/student_detail.dart';
 import '../../colors.dart';
@@ -27,20 +29,24 @@ class _CaseDetaileState extends State<CaseDetaile> {
   bool isLoading = true;
   int? _loadingScheduleId;
 
+  // Map to store booking status for each schedule using scheduleId as key
+  Map<int, bool> _bookingStatus = {};
 
   @override
   void initState() {
     super.initState();
+    // تهيئة حالة الحجز لكل موعد عند بدء الشاشة
+    for (var schedule in widget.student.schedule) {
+      _bookingStatus[schedule.id] = schedule.isBooking!;
+    }
     _initializeData();
   }
+
   Future<void> _initializeData() async {
     await Future.wait([
       _fetchStudentDetails(),
       _loadPatientData(),
     ]);
-
-    // ✅ الآن البيانات جاهزة، يمكن طباعتها
-
     setState(() {}); // تحديث الواجهة بعد تحميل البيانات
   }
 
@@ -111,7 +117,7 @@ class _CaseDetaileState extends State<CaseDetaile> {
 
   Future<void> _bookAppointment(int scheduleId) async {
     setState(() {
-      _loadingScheduleId = scheduleId; // Only this button will show loading
+      _loadingScheduleId = scheduleId; // عرض مؤشر التحميل على الزر المحدد
     });
     final apiUrl = '$api_local/appointments/';
     final response = await http.post(
@@ -122,16 +128,20 @@ class _CaseDetaileState extends State<CaseDetaile> {
       body: jsonEncode({
         "patient_id": patient?.id,
         "student_id": widget.student.studentId,
-        "thecase_id": widget.student.id, // تأكد من أن لديك الـ caseId
+        "thecase_id": widget.student.id, // تأكد من صحة الـ caseId
         "schedule_id": scheduleId,
       }),
     );
 
     setState(() {
-      _loadingScheduleId = null; // Reset after booking is done
+      _loadingScheduleId = null; // إعادة تعيين مؤشر التحميل بعد انتهاء العملية
     });
 
     if (response.statusCode == 201) {
+      // عند نجاح الحجز، نقوم بتحديث حالة الحجز في الـ Map
+      setState(() {
+        _bookingStatus[scheduleId] = true;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('تم الحجز بنجاح!'),
@@ -150,8 +160,6 @@ class _CaseDetaileState extends State<CaseDetaile> {
 
   @override
   Widget build(BuildContext context) {
-    // final availableDates = widget.student.schedule.availableDate ?? [];
-    // final availableTimes = widget.student.schedule.availableTime ?? [];
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -163,16 +171,21 @@ class _CaseDetaileState extends State<CaseDetaile> {
             color: AppColors.primaryColor,
           ),
           onPressed: () {
-            Navigator.pop(context);
+            // Navigator.pop(context);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) =>  PatientBottomNavigation()),
+            );
+
           },
         ),
         title: Text("تفاصيل الطالب"),
       ),
-      body:  isLoading
+      body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : SafeArea(
         child: SingleChildScrollView(
-          child:Column(
+          child: Column(
             children: [
               SizedBox(
                 width: 80,
@@ -201,8 +214,7 @@ class _CaseDetaileState extends State<CaseDetaile> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                            builder: (context) => StudentDetail(student: studentDetails!)),
+                        MaterialPageRoute(builder: (context) => StudentDetail(student: studentDetails!)),
                       );
                     },
                     child: const Center(
@@ -263,7 +275,7 @@ class _CaseDetaileState extends State<CaseDetaile> {
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
                       ),
-                      textAlign: TextAlign.right, // النص من اليمين إلى اليسار
+                      textAlign: TextAlign.right,
                     ),
                     const SizedBox(height: 10),
                     buildField("نوع الخدمة", widget.student.service.name),
@@ -291,29 +303,28 @@ class _CaseDetaileState extends State<CaseDetaile> {
               widget.student.schedule.isNotEmpty
                   ? Column(
                 children: List.generate(
-                  widget.student.schedule.length, // Use the length of the schedule list
-                  // 1, // أو availableDates.length إذا كنت تريد استخدام الطول الفعلي
+                  widget.student.schedule.length,
                       (index) {
-                    // final firstDate = widget.student.schedule.availableDate;
-                    // final firstTime = widget.student.schedule.availableTime;
-                        final schedule = widget.student.schedule[index]; // Get the schedule at the current index
-                        final scheduleId = schedule.id;
-                        final isBooking = schedule.isBooking;
-                        final formattedDate = DateFormat('EEEE, MMMM d, y').format(schedule.availableDate);
-                        final formattedTime = '${schedule.availableTime.hour}:${schedule.availableTime.minute.toString().padLeft(2, '0')} ${schedule.availableTime.hour >= 12 ? 'PM' : 'AM'}';
-                    // final formattedDate = DateFormat('EEEE, MMMM d, y').format(firstDate);
-                    // final formattedTime = '${firstTime.hour}:${firstTime.minute} ${firstTime.hour >= 12 ? 'PM' : 'AM'}';
+                    final schedule = widget.student.schedule[index];
+                    final scheduleId = schedule.id;
+                    // استخدم الحالة المخزنة في الـ Map
+                    bool isBooked = _bookingStatus[scheduleId] ?? false;
+                    final formattedDate = DateFormat('EEEE, MMMM d, y').format(schedule.availableDate);
+                    final formattedTime = '${schedule.availableTime.hour}:${schedule.availableTime.minute.toString().padLeft(2, '0')} ${schedule.availableTime.hour >= 12 ? 'PM' : 'AM'}';
 
                     return Card(
-                      elevation: 5, // إضافة ظل
+                      elevation: 5,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0), // حواف مستديرة
+                        borderRadius: BorderRadius.circular(15.0),
                       ),
-                      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10), // هوامش
+                      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                       child: Container(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [AppColors.primaryColor.withOpacity(0.8), AppColors.secondaryColor.withOpacity(0.8)],
+                            colors: [
+                              AppColors.primaryColor.withOpacity(0.8),
+                              AppColors.secondaryColor.withOpacity(0.8)
+                            ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
@@ -324,19 +335,18 @@ class _CaseDetaileState extends State<CaseDetaile> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              // التاريخ والوقت
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
                                     children: [
-                                      const Icon(Icons.calendar_today, size: 18, color: Colors.white),
+                                      const Icon(Icons.calendar_today, size: 16, color: Colors.white),
                                       const SizedBox(width: 8),
                                       Text(
                                         formattedDate,
                                         style: const TextStyle(
                                           color: Colors.white,
-                                          fontSize: 16,
+                                          fontSize: 14,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -345,13 +355,13 @@ class _CaseDetaileState extends State<CaseDetaile> {
                                   const SizedBox(height: 8),
                                   Row(
                                     children: [
-                                      const Icon(Icons.access_time, size: 18, color: Colors.white),
+                                      const Icon(Icons.access_time, size: 16, color: Colors.white),
                                       const SizedBox(width: 8),
                                       Text(
                                         formattedTime,
                                         style: const TextStyle(
                                           color: Colors.white,
-                                          fontSize: 16,
+                                          fontSize: 14,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -359,16 +369,15 @@ class _CaseDetaileState extends State<CaseDetaile> {
                                   ),
                                 ],
                               ),
-
                               // زر الحجز
                               ElevatedButton(
-                                onPressed: isBooking
+                                onPressed: isBooked
                                     ? null
                                     : () {
                                   _showConfirmationDialog(formattedDate, formattedTime, scheduleId);
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor:  Colors.white,
+                                  backgroundColor: isBooked ? Colors.black12 : Colors.white,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10.0),
                                   ),
@@ -382,14 +391,17 @@ class _CaseDetaileState extends State<CaseDetaile> {
                                     strokeWidth: 2,
                                     color: AppColors.primaryColor,
                                   ),
-                                ) : isBooking ? const Text(
+                                )
+                                    : isBooked
+                                    ? const Text(
                                   'تم الحجز',
                                   style: TextStyle(
                                     color: AppColors.backgroundColor,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
                                   ),
-                                ) :const Text(
+                                )
+                                    : const Text(
                                   'حجز',
                                   style: TextStyle(
                                     color: AppColors.primaryColor,
@@ -424,7 +436,6 @@ class _CaseDetaileState extends State<CaseDetaile> {
 
   void _launchWhatsApp() async {
     final phoneNumber = studentDetails?.phoneNumber;
-    // const phoneNumber = "+967774226619";
     final message = 'مرحبا! كيف حالك؟';
     final url = 'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}';
 
@@ -438,10 +449,10 @@ class _CaseDetaileState extends State<CaseDetaile> {
 
 Widget buildField(String label, String value) {
   return Wrap(
-    // mainAxisAlignment: MainAxisAlignment.start,
     children: [
       Text(
-        label,textAlign: TextAlign.right,
+        label,
+        textAlign: TextAlign.right,
         style: const TextStyle(
           color: Colors.black,
           fontSize: 15,
@@ -450,7 +461,8 @@ Widget buildField(String label, String value) {
       ),
       const SizedBox(width: 5),
       Text(
-        value,textAlign: TextAlign.left,
+        value,
+        textAlign: TextAlign.left,
         style: const TextStyle(
           color: Colors.grey,
           fontSize: 15,

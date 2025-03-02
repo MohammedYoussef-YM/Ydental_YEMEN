@@ -116,6 +116,7 @@ class _PatientAppointmentScreenState extends State<PatientAppointmentScreen>
                 id: (student["id"] as num?)?.toInt() ?? 0,
                 name: student["name"] as String? ?? 'Unknown Student',
               ), case_id: appointmentJson["thecase_id"],
+              schedule: appointmentJson["schedule"]??Schedule(id: 1, isBooking: false, availableDate: DateTime.now(), availableTime: TimeOfDay.now()),
             );
           }).toList();
 

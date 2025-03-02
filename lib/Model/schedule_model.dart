@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 
 class Schedule {
   final int id; // New field to hold the schedule ID
-  final bool isBooking; // New field to hold the schedule ID
+  final bool? isBooking; // New field to hold the schedule ID
   DateTime availableDate;
   TimeOfDay availableTime;
 
   Schedule({
     required this.id,
-    required this.isBooking,
+    this.isBooking = false,
     required this.availableDate,
     required this.availableTime,
   });
